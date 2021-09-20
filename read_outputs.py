@@ -5,7 +5,7 @@
 import numpy as np
 import itertools
 
-from toolbox.utils import load_obj, combinations_manager
+from toolbox.utils import load_obj, CombinationsManager
 
 ## NOTE: If you face any issues with loading pickled outputs then use pickle5 instead of pickle in utils.py
 
@@ -23,7 +23,7 @@ from toolbox.utils import load_obj, combinations_manager
 
 # Run for both Oinfo and dOinfo and you will have generated outputs Odict_Oinfo.pkl and Odict_dOinfo.pkl
 # Load the dicts (equivalent of structs from MATLAB)
-Odict_Oinfo = load_obj('sample_Odict_Oinfo')
+Odict_Oinfo = load_obj('Odict_Oinfo')
 Odict_dOinfo = load_obj('sample_Odict_dOinfo')
 
 
@@ -93,7 +93,7 @@ print("dOinfo readout example, higher_order = False")
 # Say you want to know the outputs for multiplet size 3 
 # then you would print the following
 target_var_index = 0
-isize = 2
+isize = 5
 print(Odict_dOinfo[target_var_index][isize])
 
 # Which will give the result:
@@ -125,7 +125,7 @@ print(Odict_dOinfo[target_var_index][isize])
 
 # In order to get back the combination of the max Redundancy value (of 0.01387719)
 # which lies in the index 22, do the following
-nvartot = 10
+nvartot = 14
 var_arr = Odict_dOinfo[target_var_index][isize]['var_arr']
 nplets_iter=itertools.combinations(var_arr,isize)
 nplets = []
@@ -196,7 +196,7 @@ print(Odict_Oinfo[isize])
 # To get the 3-plet combination with highest redundancy (of 0.14653095)
 # We need to retrieve combination paired with combinatorial numbered index 75
 
-H = combinations_manager(nvartot,isize)
+H = CombinationsManager(nvartot, isize)
 print("Combination with highest redundancy:", H.number2combination(75))
 # Which should output [5 7 9] which also obviously matches the output from higher_order = False
 print("\n \n")
@@ -241,7 +241,11 @@ print(Odict_dOinfo[target_var_index][isize])
 # In order to get back the combination of the max Redundancy value (of 0.01387719)
 # which lies in the combinatorial numbered index 13, do the following
 var_arr = Odict_dOinfo[target_var_index][isize]['var_arr']
-H = combinations_manager(nvartot,isize)
+H = CombinationsManager(nvartot, isize)
 print("Combination with highest redundancy:", var_arr[H.number2combination(13)-1])
 # Which should output [ 4 10]
 print("\n \n")
+
+print("highest 4 syn : ", C[212], C[258], C[908])
+print("\n")
+print("highest 4 red : ", C[951], C[987], C[441])
