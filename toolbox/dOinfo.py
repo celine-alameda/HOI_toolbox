@@ -4,7 +4,7 @@ import itertools
 from tqdm.auto import tqdm
 from toolbox.gcmi import copnorm, gccmi_ccc_nocopnorm
 from toolbox.lin_est import lin_cmi_ccc
-from toolbox.utils import bootci, combinations_manager, ncr
+from toolbox.utils import bootci, CombinationsManager, ncr
 
 def get_cmi(A,B,C, estimator):
     if estimator=='lin_est':
@@ -95,7 +95,7 @@ def exhaustive_loop_lagged(ts, config):
                 Otot = {}
                 var_arr = np.setdiff1d(np.arange(1,nvartot+1), itarget+1)
                 if higher_order:
-                    H = combinations_manager(len(var_arr), isize)
+                    H = CombinationsManager(len(var_arr), isize)
                     ncomb = ncr(len(var_arr), isize)
                     O_pos = np.zeros(n_best)
                     O_neg = np.zeros(n_best)
