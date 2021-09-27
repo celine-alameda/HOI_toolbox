@@ -10,7 +10,7 @@ from toolbox.utils import load_obj, CombinationsManager
 ## NOTE: If you face any issues with loading pickled outputs then use pickle5 instead of pickle in utils.py
 
 
-## Case 1: argument higher_order = False. 
+## Case 1: argument higher_order = False.
 # Pregenerating all possible combinations, not using the combinatorial numbering system.
 # To follow along,
 # Run the toy_example.py on fmri timeseries of just first 10 variables for the following config
@@ -18,12 +18,12 @@ from toolbox.utils import load_obj, CombinationsManager
 # "estimator": "gcmi",
 # "modelorder":3,
 # "maxsize":4,
-# "n_best":10, 
+# "n_best":10,
 # "nboot":100
 
 # Run for both Oinfo and dOinfo and you will have generated outputs Odict_Oinfo.pkl and Odict_dOinfo.pkl
 # Load the dicts (equivalent of structs from MATLAB)
-Odict_Oinfo = load_obj('Odict_Oinfo')
+Odict_Oinfo = load_obj('sample_Odict_Oinfo')
 Odict_dOinfo = load_obj('sample_Odict_dOinfo')
 
 
@@ -72,9 +72,9 @@ nplets_iter=itertools.combinations(range(1,nvartot+1),isize)
 nplets = []
 for nplet in nplets_iter:
     nplets.append(nplet)
-C = np.array(nplets) 
+C = np.array(nplets)
 
-# Now C will have all possible 10C3 combinations - 
+# Now C will have all possible 10C3 combinations -
 # That means the 2d array looks like [[ 1  2  3], [ 1  2  4],..., [ 7  9 10], [ 8  9 10]]
 # The combination at index 105 can be retrieved as follows
 print("Combination with highest redundancy:", C[105])
@@ -90,10 +90,10 @@ print("dOinfo readout example, higher_order = False")
 # How to read the dOinfo output?
 # dOinfo computation additionally requires fixing a target
 # So lets say you fix the first variable (ROI/timeseries) as target which is 0 index and
-# Say you want to know the outputs for multiplet size 3 
+# Say you want to know the outputs for multiplet size 3
 # then you would print the following
 target_var_index = 0
-isize = 5
+isize = 2
 print(Odict_dOinfo[target_var_index][isize])
 
 # Which will give the result:
@@ -125,7 +125,7 @@ print(Odict_dOinfo[target_var_index][isize])
 
 # In order to get back the combination of the max Redundancy value (of 0.01387719)
 # which lies in the index 22, do the following
-nvartot = 14
+nvartot = 10
 var_arr = Odict_dOinfo[target_var_index][isize]['var_arr']
 nplets_iter=itertools.combinations(var_arr,isize)
 nplets = []
@@ -185,10 +185,10 @@ print(Odict_Oinfo[isize])
 # The indices don't vary each run and are fixed for a fixed N and a fixed K in N choose K combinations
 
 
-# For those who are interested: 
+# For those who are interested:
 # This Wikipedia page explains it nicely - https://en.wikipedia.org/wiki/Combinatorial_number_system#Place_of_a_combination_in_the_ordering
-# The class combinations_manager in utils.py which implements this mapping (both combination to a number and the other way round) along with your nextchoose function. 
-# Using the nextchoose function to generate subsequent combinations is still faster than looping through say 1 to nCk and getting the combination for each number, 
+# The class combinations_manager in utils.py which implements this mapping (both combination to a number and the other way round) along with your nextchoose function.
+# Using the nextchoose function to generate subsequent combinations is still faster than looping through say 1 to nCk and getting the combination for each number,
 # so I continue to use the nextchoose function to generate nCk combinations in the main exhaustive loop
 # I've tried to illustrate it in a simple 5C3 example here - https://docs.google.com/spreadsheets/d/1A-JTEIu2pMHfYKUtrXUwUxDwllwveWbNJN0l2jB6vkA/edit?usp=sharing
 
@@ -196,7 +196,7 @@ print(Odict_Oinfo[isize])
 # To get the 3-plet combination with highest redundancy (of 0.14653095)
 # We need to retrieve combination paired with combinatorial numbered index 75
 
-H = CombinationsManager(nvartot, isize)
+H = CombinationsManager(nvartot,isize)
 print("Combination with highest redundancy:", H.number2combination(75))
 # Which should output [5 7 9] which also obviously matches the output from higher_order = False
 print("\n \n")
@@ -208,7 +208,7 @@ print("dOinfo readout example, higher_order = True")
 # How to read the dOinfo output?
 # dOinfo computation additionally requires fixing a target
 # So lets say you fix the first variable (ROI/timeseries) as target which is 0 index and
-# Say you want to know the outputs for multiplet size 3 
+# Say you want to know the outputs for multiplet size 3
 # then you would print the following... (same as before)
 
 target_var_index = 0
@@ -241,11 +241,7 @@ print(Odict_dOinfo[target_var_index][isize])
 # In order to get back the combination of the max Redundancy value (of 0.01387719)
 # which lies in the combinatorial numbered index 13, do the following
 var_arr = Odict_dOinfo[target_var_index][isize]['var_arr']
-H = CombinationsManager(nvartot, isize)
+H = CombinationsManager(nvartot,isize)
 print("Combination with highest redundancy:", var_arr[H.number2combination(13)-1])
 # Which should output [ 4 10]
 print("\n \n")
-
-print("highest 4 syn : ", C[212], C[258], C[908])
-print("\n")
-print("highest 4 red : ", C[951], C[987], C[441])
