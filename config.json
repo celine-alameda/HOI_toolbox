@@ -1,11 +1,11 @@
 {
 	"input_type": "tsv",	
-	"input": "scenario1_hoi_sound_on.tsv",
+	"input": "scenario1_hoi_sound_off.tsv",
 	"metric": "Oinfo",
 	"higher_order": false,
 	"estimator": "gcmi",
 	"modelorder":3,
-	"maxsize":5,
+	"maxsize":6,
 	"n_best":20,
 	"nboot":159
 }
