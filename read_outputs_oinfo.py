@@ -37,9 +37,6 @@ for nplet_size in range(3, n_variables + 1):
     if "index_red" in o_info_dict[nplet_size]:
         red_indices = o_info_dict[nplet_size]["index_red"]
         red_values = o_info_dict[nplet_size]["sorted_red"]
-        total_red = 0
-        for i in range(len(red_values)):
-            total_red += red_values[i]
         print("Highest redundancies for nplet of size {} :".format(nplet_size))
         for i in range(len(red_indices)):
             data_row = {}
@@ -54,17 +51,13 @@ for nplet_size in range(3, n_variables + 1):
                     data_row[name] = 0
             data_row["Size"] = nplet_size
             data_row["Type"] = "Red"
+            data_row["Rank"] = i + 1
             data_row["Value"] = red_values[i]
-            data_row["% Total"] = 100 * red_values[i] / total_red
             output_data.append(data_row)
-            print("{} with value {} % total {}".format(variable_names_in_output, red_values[i],
-                                                       100 * red_values[i] / total_red))
+            print("{} with value {}".format(variable_names_in_output, red_values[i]))
     if "index_syn" in o_info_dict[nplet_size]:
         syn_indices = o_info_dict[nplet_size]["index_syn"]
         syn_values = o_info_dict[nplet_size]["sorted_syn"]
-        total_syn = 0
-        for i in range(len(syn_values)):
-            total_syn += syn_values[i]
         print("Highest synergies for nplet of size {} :".format(nplet_size))
         for i in range(len(syn_indices)):
             data_row = {}
@@ -79,11 +72,10 @@ for nplet_size in range(3, n_variables + 1):
                     data_row[name] = 0
             data_row["Size"] = nplet_size
             data_row["Type"] = "Syn"
+            data_row["Rank"] = i + 1
             data_row["Value"] = syn_values[i]
-            data_row["% Total"] = 100 * syn_values[i] / total_syn
             output_data.append(data_row)
-            print("{} with value {} % total {}".format(variable_names_in_output, syn_values[i],
-                                                       100 * syn_values[i] / total_syn))
+            print("{} with value {}".format(variable_names_in_output, syn_values[i]))
 output_df = pd.DataFrame(output_data)
-output_file_name = save_name+".xlsx"
+output_file_name = save_name + ".xlsx"
 output_df.to_excel(output_file_name)
