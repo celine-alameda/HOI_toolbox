@@ -25,10 +25,9 @@ o_info_dict = load_obj(save_name)
 print("Oinfo readout, object {}".format(save_name))
 
 n_variables = len(variable_names)
-
+output_data = []
 for nplet_size in range(3, n_variables + 1):
-    output_data = []
-    print(o_info_dict[nplet_size])
+    # print(o_info_dict[nplet_size])
     nplets_iter = itertools.combinations(range(1, n_variables + 1), nplet_size)
     nplets = []
     for nplet in nplets_iter:
@@ -53,6 +52,7 @@ for nplet_size in range(3, n_variables + 1):
                     data_row[name] = 1
                 else:
                     data_row[name] = 0
+            data_row["Size"] = nplet_size
             data_row["Type"] = "Red"
             data_row["Value"] = red_values[i]
             data_row["% Total"] = 100 * red_values[i] / total_red
@@ -77,12 +77,13 @@ for nplet_size in range(3, n_variables + 1):
                     data_row[name] = 1
                 else:
                     data_row[name] = 0
+            data_row["Size"] = nplet_size
             data_row["Type"] = "Syn"
             data_row["Value"] = syn_values[i]
             data_row["% Total"] = 100 * syn_values[i] / total_syn
             output_data.append(data_row)
             print("{} with value {} % total {}".format(variable_names_in_output, syn_values[i],
                                                        100 * syn_values[i] / total_syn))
-    output_df = pd.DataFrame(output_data)
-    output_file_name = save_name+"_nplet_"+str(nplet_size)+".xlsx"
-    output_df.to_excel(output_file_name)
+output_df = pd.DataFrame(output_data)
+output_file_name = save_name+".xlsx"
+output_df.to_excel(output_file_name)
