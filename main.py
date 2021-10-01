@@ -1,6 +1,7 @@
 # Author: Pranav Mahajan, 2021
 
 import numpy as np
+import pandas as pd
 from numpy import genfromtxt
 import scipy.io
 import time
@@ -28,7 +29,8 @@ with open(configFilename, "r") as fd:
 if ("metric" in config):
     metric = config["metric"]
 else:
-    metric = "Oinfo"
+    print("ERROR : no metric specified")
+    exit(1)
 
 if ("input" in config):
     file_name = config["input"]
@@ -68,8 +70,7 @@ if metric == "Oinfo":
     save_obj(Odict, save_name)
     Odict_Oinfo = load_obj('Odict_Oinfo')
     print("Done.")
-
-if metric == "dOinfo":
+elif metric == "dOinfo":
     print("WARNING : CHECK CODE TO SEE IF INPUT FILE IS CORRECT")
     t = time.time()
     Odict = exhaustive_loop_lagged(ts, config)
@@ -79,15 +80,18 @@ if metric == "dOinfo":
     Odict_dOinfo = load_obj('Odict_dOinfo')
     print(Odict_dOinfo)
 
-if metric == "local_o":
-    print("NOT IMPLEMENTED YET")
-    exit(0)
+elif metric == "local_o":
     t = time.time()
-    local_o = exhaustive_local_o(ts, config)
+    ts = pd.DataFrame(ts.transpose())
+    local_o = exhaustive_local_o(ts)
     elapsed = time.time() - t
     print("Elapsed time is ", elapsed, " seconds.")
-    save_name = config["input"].split(".")[0]
+    save_name = config["input"].split(".")[0]+"_local"
     print("Saving and trying to load again")
     save_obj(local_o, save_name)
-    local_o = load_obj('Odict_Oinfo')
+    local_o = load_obj(save_name)
+    print(local_o)
     print("Done.")
+else :
+    print("ERROR : Unknown metric")
+    exit(1)
