@@ -35,10 +35,11 @@ def exhaustive_local_o(data_table: pd.DataFrame):
                     no_variable_list.append(j)
             data_var = [data[index_variable]]
             variable_probability = state_probability.get_probability(variable_list, data_var)
-            data_no_var = data.copy().pop(index_variable)
+            data_no_var = data.copy()
+            data_no_var.pop(index_variable)
             no_variable_probability = state_probability.get_probability(no_variable_list, data_no_var)
             local_o += (entropy(variable_probability) - entropy(no_variable_probability))
-            local_os.append(local_o)
+        local_os.append(local_o)
     return local_os
 
 

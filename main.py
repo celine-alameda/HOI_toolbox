@@ -65,11 +65,12 @@ if metric == "Oinfo":
     Odict = exhaustive_loop_zerolag(ts, config)
     elapsed = time.time() - t
     print("Elapsed time is ", elapsed, " seconds.")
-    save_name = config["input"].split(".")[0]
+    save_name = config["input"].split(".")[0] + "_O"
     print("Saving and trying to load again")
     save_obj(Odict, save_name)
     Odict_Oinfo = load_obj('Odict_Oinfo')
     print("Done.")
+
 elif metric == "dOinfo":
     print("WARNING : CHECK CODE TO SEE IF INPUT FILE IS CORRECT")
     t = time.time()

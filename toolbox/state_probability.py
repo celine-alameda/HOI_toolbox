@@ -1,18 +1,16 @@
 """state_probability.py
 
 compute and retrieve probabilities for continuous, possibly polynomial, distributions"""
+import math
 
 import pandas as pd
 import scipy.stats
-
-# fit an empirical cdf to a bimodal dataset
-from matplotlib import pyplot
 
 
 class StateProbability:
     _all_probability_density_functions = {}
 
-    def __init__(self, data_table):
+    def __init__(self, data_table : pd.DataFrame):
         """initializes the StateProbability object
         Parameters
         ----------
@@ -32,17 +30,16 @@ class StateProbability:
             values of the variables"""
         which_variables.sort()
         if tuple(which_variables) not in self._all_probability_density_functions.keys():
-            pdf = self._create_pdf(which_variables)
-            self._all_probability_density_functions[tuple(which_variables)] = pdf
-            ### right thing ?? TODO
-            pdf.pdf(values)
-            print(pdf.pdf(values))
+            kde = self._create_kde(which_variables)
+            self._all_probability_density_functions[tuple(which_variables)] = kde
+        else:
+            kde = self._all_probability_density_functions[tuple(which_variables)]
 
         # use it now
-        return 1.0
+        return kde.pdf(values)
 
-    def _create_pdf(self, which_variables):
+    def _create_kde(self, which_variables):
         data_necessary = self._data_table.iloc[:, which_variables]
-        return scipy.stats.gaussian_kde(data_necessary)
+        return scipy.stats.gaussian_kde(data_necessary.T)
 
 
