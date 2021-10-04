@@ -17,14 +17,16 @@ if (argCount > 1):
 with open(configFilename, "r") as fd:
     config = json.load(fd)
 
-data = pd.read_table(config["input"])
+data = pd.read_table("data/"+config["input"])
 variable_names = list(data.columns)
-save_name = config["input"].split(".")[0] + "_local"
+save_name = "local_o_" + config["input"].split(".")[0]
 local_o_info = load_obj(save_name)
 
 print("Local o info readout, object {}".format(save_name))
-print(local_o_info)
 
-data["Local o"] = local_o_info
+data["Local o"] = local_o_info["local_o"]
+data["sig"] = local_o_info["significances"]
+data["lower_ci"] = local_o_info["lower_ci"]
+data["upper_ci"] = local_o_info["upper_ci"]
 output_file_name = save_name + ".xlsx"
 data.to_excel(output_file_name)

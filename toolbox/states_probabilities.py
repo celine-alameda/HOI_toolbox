@@ -1,4 +1,4 @@
-"""state_probability.py
+"""states_probabilities.py
 
 compute and retrieve probabilities for continuous, possibly polynomial, distributions"""
 import math
@@ -7,10 +7,10 @@ import pandas as pd
 import scipy.stats
 
 
-class StateProbability:
-    _all_probability_density_functions = {}
+class StatesProbabilities:
 
-    def __init__(self, data_table : pd.DataFrame):
+
+    def __init__(self, data_table: pd.DataFrame):
         """initializes the StateProbability object
         Parameters
         ----------
@@ -19,6 +19,7 @@ class StateProbability:
         self._data_table = data_table
         self._n_variables = data_table.shape[1]
         self._n_samples = data_table.shape[0]
+        self._all_probability_density_functions = {}
 
     def get_probability(self, which_variables, values) -> float:
         """computes the probability of a given state.
@@ -41,5 +42,3 @@ class StateProbability:
     def _create_kde(self, which_variables):
         data_necessary = self._data_table.iloc[:, which_variables]
         return scipy.stats.gaussian_kde(data_necessary.T)
-
-

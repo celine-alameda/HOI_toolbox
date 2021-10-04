@@ -18,21 +18,21 @@ def get_ent(X, estimator):
     return entropy
 
 
-def o_information_boot(X, indsample, indvar, estimator):
+def o_information_boot(data, indices_sample, indices_variables, estimator):
     # this function takes the whole X as input, and additionally the indices
     # convenient for bootstrap
     # X size is M(variables) x N (samples)
 
     # print("1 ",X.shape)
-    X = X[indvar, :]
-    X = X[:, indsample]
+    data = data[indices_variables, :]
+    data = data[:, indices_sample]
 
-    M, N = X.shape
-    o = (M - 2) * get_ent(X, estimator)
+    M, N = data.shape
+    o = (M - 2) * get_ent(data, estimator)
 
     for j in range(M):
-        X1 = np.delete(X, j, axis=0)
-        o = o + get_ent(X[j, :], estimator) - get_ent(X1, estimator)
+        X1 = np.delete(data, j, axis=0)
+        o = o + get_ent(data[j, :], estimator) - get_ent(X1, estimator)
     return o
 
 
@@ -123,7 +123,9 @@ def exhaustive_loop_zerolag(ts, config):
                     if higher_order:
                         indvar = combinations_manager.number2combination(ind_neg[ind_neg_sort[isel]])
                     else:
+                        # All combinations with a negative O, in order.
                         indvar = np.squeeze(combinations[ind_neg[ind_neg_sort[isel]], :])
+                    # -1 because combinations start at 1
                     f = lambda xsamp: o_information_boot(X, xsamp, indvar - 1, estimator)
                     ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
                     boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
