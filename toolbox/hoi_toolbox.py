@@ -78,10 +78,9 @@ class HOIToolbox:
             local_o = exhaustive_local_o(ts)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
-            print("Saving and trying to load again")
+            print("Saving " + output_file + " and trying to load again")
             save_obj(local_o, output_file)
             local_o = load_obj(output_file)
-            print(local_o)
             print("Done.")
         else:
             print("ERROR : Unknown metric")

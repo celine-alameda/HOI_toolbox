@@ -1,6 +1,6 @@
 {
 	"input_type": "tsv",	
-	"input": "scenario3_trial_1.tsv",
+	"input": "scenario1bis_trial_1_on.tsv",
 	"metric": "local_o",
 	"higher_order": false,
 	"estimator": "gcmi",

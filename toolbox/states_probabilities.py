@@ -1,14 +1,12 @@
 """states_probabilities.py
 
 compute and retrieve probabilities for continuous, possibly polynomial, distributions"""
-import math
 
 import pandas as pd
 import scipy.stats
 
 
 class StatesProbabilities:
-
 
     def __init__(self, data_table: pd.DataFrame):
         """initializes the StateProbability object
