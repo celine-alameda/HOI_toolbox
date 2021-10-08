@@ -6,7 +6,7 @@ import time
 
 from toolbox.Oinfo import exhaustive_loop_zerolag
 from toolbox.dOinfo import exhaustive_loop_lagged
-from toolbox.local_o_info import exhaustive_local_o
+from toolbox.local_o_info import LocalOHOI
 from toolbox.utils import save_obj, load_obj
 
 
@@ -75,7 +75,8 @@ class HOIToolbox:
         elif self.metric == "local_o":
             t = time.time()
             ts = pd.DataFrame(self.ts.transpose())
-            local_o = exhaustive_local_o(ts)
+            local_o_hoi = LocalOHOI(bootstrap=False)
+            local_o = local_o_hoi.exhaustive_local_o(ts)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
             print("Saving " + output_file + " and trying to load again")
