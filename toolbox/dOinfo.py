@@ -2,8 +2,8 @@ import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
-from toolbox.gcmi import copnorm, gccmi_ccc_nocopnorm
-from toolbox.lin_est import lin_cmi_ccc
+from toolbox.estimator.gcmi import copnorm, gccmi_ccc_nocopnorm
+from toolbox.estimator.lin_est import lin_cmi_ccc
 from toolbox.utils import bootci, CombinationsManager, ncr
 
 

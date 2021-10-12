@@ -2,16 +2,10 @@
     Work in progress.
  """
 import math
-import sys
 import numpy as np
-import itertools
 
 import pandas as pd
 from sklearn.utils import resample
-from tqdm.auto import tqdm
-from toolbox.gcmi import copnorm, ent_g
-from toolbox.lin_est import lin_ent
-from toolbox.utils import bootci, CombinationsManager, ncr
 from toolbox.states_probabilities import StatesProbabilities
 
 

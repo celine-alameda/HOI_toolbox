@@ -1,10 +1,7 @@
 import numpy as np
-import scipy.io
-import os
 import time
-from toolbox.gcmi import copnorm, gccmi_ccc_nocopnorm, ent_g
-from toolbox.lin_est import lin_ent, lin_cmi_ccc
-
+from toolbox.estimator.gcmi import copnorm, ent_g
+from toolbox.estimator.lin_est import lin_ent
 
 ## Check timing for entropy computation
 
