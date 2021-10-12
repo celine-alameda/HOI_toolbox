@@ -1,7 +1,7 @@
 {
 	"input_type": "tsv",	
-	"input": "scenario1bis_trial_1_on.tsv",
-	"metric": "local_o",
+	"input": "scenario1_hoi_sound_post.tsv",
+	"metric": "Oinfo",
 	"higher_order": false,
 	"estimator": "gcmi",
 	"modelorder":3,

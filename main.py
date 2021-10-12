@@ -3,9 +3,8 @@
 import json
 import sys
 import os
-import pandas as pd
+
 from toolbox.hoi_toolbox import HOIToolbox
-from toolbox.utils import load_obj
 
 configFilename = "config.json"
 argCount = len(sys.argv)
@@ -20,18 +19,6 @@ with open(configFilename, "r") as fd:
     config = json.load(fd)
 
 tb = HOIToolbox(config)
+tb.run()
 
-for i in range(1, 160):
-    file_name = "scenario1bis_trial_" + str(i) + ".tsv"
-    print("using " + file_name)
-    tb.file_name = file_name
-    tb.run()
-
-    # data = pd.read_table("data/" + file_name)
-    # variable_names = list(data.columns)
-    # save_name = file_name.split(".")[0]
-    # local_o_info = load_obj("local_o_"+save_name)
-    # print("Local o info readout, object {}".format(save_name))
-
-    # output_file_name = save_name + ".xlsx"
-    # data.to_excel(output_file_name)
+# todo add read_outputs here

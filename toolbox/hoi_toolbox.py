@@ -3,9 +3,8 @@ import numpy as np
 import pandas as pd
 import scipy.io
 import time
-
-from toolbox.Oinfo import exhaustive_loop_zerolag
-from toolbox.dOinfo import exhaustive_loop_lagged
+from toolbox.Oinfo import OInfoCalculator
+from toolbox.dOinfo import DOInfoCalculator
 from toolbox.local_o_info import LocalOHOI
 from toolbox.utils import save_obj, load_obj
 
@@ -50,10 +49,11 @@ class HOIToolbox:
             print("Unknown input type")
             exit(1)
         output_file = self.metric + "_" + self.file_name.split(".")[0]
+
         if self.metric == "Oinfo":
-            print("WARNING : NOT REFACTORED / OPTIMIZED YET")
             t = time.time()
-            Odict = exhaustive_loop_zerolag(self.ts, self.config)
+            o_info_calculator = OInfoCalculator()
+            Odict = o_info_calculator.exhaustive_loop_zerolag(self.ts, self.config)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
             save_name = self.config["input"].split(".")[0] + "_O"
@@ -65,7 +65,8 @@ class HOIToolbox:
         elif self.metric == "dOinfo":
             print("WARNING : NOT REFACTORED / OPTIMIZED YET")
             t = time.time()
-            Odict = exhaustive_loop_lagged(self.ts, self.config)
+            d_o_info_calculator = DOInfoCalculator()
+            Odict = d_o_info_calculator.exhaustive_loop_lagged(self.ts, self.config)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
             save_obj(Odict, 'Odict_dOinfo')
