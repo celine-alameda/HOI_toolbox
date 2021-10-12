@@ -2,21 +2,19 @@ import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
-from toolbox.estimator.gcmi import copnorm, ent_g
-from toolbox.estimator.lin_est import lin_ent
+from toolbox.estimator.gcmi import copnorm
+from toolbox.higher_order_information.HOI import HOI
 from toolbox.utils import bootci, CombinationsManager, ncr
 
 
-class OInfoCalculator:
+class OInfoCalculator(HOI):
+
+    def __init__(self, config):
+        super().__init__(config)
+
 
     def get_ent(self, X, estimator):
-        if estimator == 'lin_est':
-            entropy = lin_ent(X)
-        elif estimator == 'gcmi':
-            entropy = ent_g(X)
-        else:
-            print("Please use estimator out of the following - 'lin_est' or 'gcmi'")
-            sys.exit()
+        entropy = self.estimator.estimate_entropy(X)
         return entropy
 
     def o_information_boot(self, data, indices_sample, indices_variables, estimator):

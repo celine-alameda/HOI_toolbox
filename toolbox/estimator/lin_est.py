@@ -1,18 +1,6 @@
 import numpy as np
 
-
-def lin_ent(X):
-    # X is of shape (num var, num timepoints)
-    covX = np.cov(X)
-    if covX.ndim == 0:
-        covX = np.var(X)
-        det_covX = covX
-        N = 1
-    else:
-        det_covX = np.linalg.det(covX)
-        N = X.shape[0]
-    e = 0.5 * np.log(det_covX) + 0.5 * N * np.log(2 * np.pi * np.exp(1))
-    return e
+from toolbox.estimator.estimator import Estimator
 
 
 def lin_CE(Yb, Z):
@@ -31,10 +19,28 @@ def lin_CE(Yb, Z):
     return ce
 
 
-def lin_cmi_ccc(Y, X0, Y0):
-    H_Y_Y0 = lin_CE(Y, Y0)
-    X0Y0 = np.concatenate((X0, Y0), axis=1)
-    H_Y_X0Y0 = lin_CE(Y, X0Y0)
-    cmi = H_Y_Y0 - H_Y_X0Y0
-    # print(cmi, H_Y_Y0, H_Y_X0Y0)
-    return cmi
+class LinearEstimator(Estimator):
+
+    def estimate_cmi(self, y, x0, y0):
+        y = y.T
+        x0 = x0.T
+        y0 = y0.T
+        H_Y_Y0 = lin_CE(y, y0)
+        X0Y0 = np.concatenate((x0, y0), axis=1)
+        H_Y_X0Y0 = lin_CE(y, X0Y0)
+        cmi = H_Y_Y0 - H_Y_X0Y0
+        # print(cmi, H_Y_Y0, H_Y_X0Y0)
+        return cmi
+
+    def estimate_entropy(self, x):
+        # X is of shape (num var, num timepoints)
+        covX = np.cov(x)
+        if covX.ndim == 0:
+            covX = np.var(x)
+            det_covX = covX
+            N = 1
+        else:
+            det_covX = np.linalg.det(covX)
+            N = x.shape[0]
+        e = 0.5 * np.log(det_covX) + 0.5 * N * np.log(2 * np.pi * np.exp(1))
+        return e

@@ -9,6 +9,8 @@ import warnings
 
 __version__ = '0.3'
 
+from toolbox.estimator.estimator import Estimator
+
 
 def ctransform(x):
     """Copula transformation (empirical CDF)
@@ -34,41 +36,6 @@ def copnorm(x):
     # cx = sp.stats.norm.ppf(ctransform(x))
     cx = sp.special.ndtri(ctransform(x))
     return cx
-
-
-def ent_g(x, biascorrect=True):
-    """Entropy of a Gaussian variable in bits
-
-    H = ent_g(x) returns the entropy of a (possibly 
-    multidimensional) Gaussian variable x with bias correction.
-    Columns of x correspond to samples, rows to dimensions/variables. 
-    (Samples last axis)
-
-    """
-    x = np.atleast_2d(x)
-    if x.ndim > 2:
-        raise ValueError("x must be at most 2d")
-    Ntrl = x.shape[1]
-    Nvarx = x.shape[0]
-
-    # demean data
-    x = x - x.mean(axis=1)[:, np.newaxis]
-    # covariance
-    C = np.dot(x, x.T) / float(Ntrl - 1)
-    chC = np.linalg.cholesky(C)
-    # chC = sp.linalg.cholesky(C, lower=True) #alternative, but not any faster.
-
-    # entropy in nats
-    HX = np.sum(np.log(np.diagonal(chC))) + 0.5 * Nvarx * (np.log(2 * np.pi) + 1.0)
-
-    ln2 = np.log(2)
-    if biascorrect:
-        psiterms = sp.special.psi((Ntrl - np.arange(1, Nvarx + 1).astype(np.float)) / 2.0) / 2.0
-        dterm = (ln2 - np.log(Ntrl - 1.0)) / 2.0
-        HX = HX - Nvarx * dterm - psiterms.sum()
-
-    # convert to bits
-    return HX / ln2
 
 
 def mi_gg(x, y, biascorrect=True, demeaned=False):
@@ -594,56 +561,6 @@ def gccmi_ccc(x, y, z):
     return I
 
 
-def gccmi_ccc_nocopnorm(x, y, z):
-    # DOES NOT DO COPULA NORMALIZATION, YOU'RE SUPPOSED TO DO IT IN ADVANCE
-    """Gaussian-Copula CMI between three continuous variables.
-
-    I = gccmi_ccc(x,y,z) returns the CMI between two (possibly multidimensional)
-    continuous variables, x and y, conditioned on a third, z, estimated via a
-    Gaussian copula.
-    If x and/or y are multivariate columns must correspond to samples, rows
-    to dimensions/variables. (Samples first axis)
-
-    """
-
-    x = np.atleast_2d(x)
-    y = np.atleast_2d(y)
-    z = np.atleast_2d(z)
-    if x.ndim > 2 or y.ndim > 2 or z.ndim > 2:
-        raise ValueError("x, y and z must be at most 2d")
-
-    Ntrl = x.shape[1]
-    Nvarx = x.shape[0]
-    Nvary = y.shape[0]
-    Nvarz = z.shape[0]
-
-    if y.shape[1] != Ntrl or z.shape[1] != Ntrl:
-        raise ValueError("number of trials do not match")
-
-    # # check for repeated values
-    # for xi in range(Nvarx):
-    #     if (np.unique(x[xi,:]).size / float(Ntrl)) < 0.9:
-    #         warnings.warn("Input x has more than 10% repeated values")
-    #         break
-    # for yi in range(Nvary):
-    #     if (np.unique(y[yi,:]).size / float(Ntrl)) < 0.9:
-    #         warnings.warn("Input y has more than 10% repeated values")
-    #         break
-    # for zi in range(Nvarz):
-    #     if (np.unique(z[zi,:]).size / float(Ntrl)) < 0.9:
-    #         warnings.warn("Input y has more than 10% repeated values")
-    #         break
-
-    # # copula normalization
-    # cx = copnorm(x)
-    # cy = copnorm(y)
-    # cz = copnorm(z)
-
-    # parametric Gaussian CMI
-    I = cmi_ggg(x, y, z, True, True)
-    return I
-
-
 def gccmi_ccd(x, y, z, Zm):
     """Gaussian-Copula CMI between 2 continuous variables conditioned on a discrete variable.
 
@@ -708,3 +625,91 @@ def gccmi_ccd(x, y, z, Zm):
     CMI = np.sum(Pz * Icond)
     I = mi_gg(np.hstack(cx), np.hstack(cy), True, False)
     return (CMI, I)
+
+
+class GCMIEstimator(Estimator):
+
+    def estimate_entropy(self, x):
+        """Entropy of a Gaussian variable in bits
+
+            H = estimate_entropy(x) returns the entropy of a (possibly
+            multidimensional) Gaussian variable x with bias correction.
+            Columns of x correspond to samples, rows to dimensions/variables.
+            (Samples last axis)
+
+            """
+        biascorrect = True
+        x = np.atleast_2d(x)
+        if x.ndim > 2:
+            raise ValueError("x must be at most 2d")
+        Ntrl = x.shape[1]
+        Nvarx = x.shape[0]
+
+        # demean data
+        x = x - x.mean(axis=1)[:, np.newaxis]
+        # covariance
+        C = np.dot(x, x.T) / float(Ntrl - 1)
+        chC = np.linalg.cholesky(C)
+        # chC = sp.linalg.cholesky(C, lower=True) #alternative, but not any faster.
+
+        # entropy in nats
+        HX = np.sum(np.log(np.diagonal(chC))) + 0.5 * Nvarx * (np.log(2 * np.pi) + 1.0)
+
+        ln2 = np.log(2)
+        if biascorrect:
+            psiterms = sp.special.psi((Ntrl - np.arange(1, Nvarx + 1).astype(np.float)) / 2.0) / 2.0
+            dterm = (ln2 - np.log(Ntrl - 1.0)) / 2.0
+            HX = HX - Nvarx * dterm - psiterms.sum()
+
+        # convert to bits
+        return HX / ln2
+
+    def estimate_cmi(self, y, x0, y0):
+        # DOES NOT DO COPULA NORMALIZATION, YOU'RE SUPPOSED TO DO IT IN ADVANCE
+        """Gaussian-Copula CMI between three continuous variables.
+        Copula normalization has to be done before calling this function.
+
+        I = gccmi_ccc(x,y,z) returns the CMI between two (possibly multidimensional)
+        continuous variables, x and y, conditioned on a third, z, estimated via a
+        Gaussian copula.
+        If x and/or y are multivariate columns must correspond to samples, rows
+        to dimensions/variables. (Samples first axis)
+
+        """
+
+        x = np.atleast_2d(y)
+        y = np.atleast_2d(x0)
+        z = np.atleast_2d(y0)
+        if x.ndim > 2 or y.ndim > 2 or z.ndim > 2:
+            raise ValueError("x, y and z must be at most 2d")
+
+        Ntrl = x.shape[1]
+        Nvarx = x.shape[0]
+        Nvary = y.shape[0]
+        Nvarz = z.shape[0]
+
+        if y.shape[1] != Ntrl or z.shape[1] != Ntrl:
+            raise ValueError("number of trials do not match")
+
+        # # check for repeated values
+        # for xi in range(Nvarx):
+        #     if (np.unique(x[xi,:]).size / float(Ntrl)) < 0.9:
+        #         warnings.warn("Input x has more than 10% repeated values")
+        #         break
+        # for yi in range(Nvary):
+        #     if (np.unique(y[yi,:]).size / float(Ntrl)) < 0.9:
+        #         warnings.warn("Input y has more than 10% repeated values")
+        #         break
+        # for zi in range(Nvarz):
+        #     if (np.unique(z[zi,:]).size / float(Ntrl)) < 0.9:
+        #         warnings.warn("Input y has more than 10% repeated values")
+        #         break
+
+        # # copula normalization
+        # cx = copnorm(x)
+        # cy = copnorm(y)
+        # cz = copnorm(z)
+
+        # parametric Gaussian CMI
+        I = cmi_ggg(x, y, z, True, True)
+        return I

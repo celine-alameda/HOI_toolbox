@@ -2,21 +2,18 @@ import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
-from toolbox.estimator.gcmi import copnorm, gccmi_ccc_nocopnorm
-from toolbox.estimator.lin_est import lin_cmi_ccc
+from toolbox.estimator.gcmi import copnorm
+from toolbox.higher_order_information.HOI import HOI
 from toolbox.utils import bootci, CombinationsManager, ncr
 
 
-class DOInfoCalculator:
+class DOInfoCalculator(HOI):
+
+    def __init__(self, config):
+        super().__init__(config)
 
     def get_cmi(self, A, B, C, estimator):
-        if estimator == 'lin_est':
-            cmi = lin_cmi_ccc(A.T, B.T, C.T)
-        elif estimator == 'gcmi':
-            cmi = gccmi_ccc_nocopnorm(A, B, C)
-        else:
-            print("Please use estimator out of the following - 'lin_est' or 'gcmi'")
-            sys.exit()
+        cmi = self.estimator.estimate_cmi(self, A, B, C)
         return cmi
 
     def o_information_lagged_boot(self, Y, X, m, indstart, chunklength, indvar, estimator):

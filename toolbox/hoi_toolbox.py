@@ -52,7 +52,7 @@ class HOIToolbox:
 
         if self.metric == "Oinfo":
             t = time.time()
-            o_info_calculator = OInfoCalculator()
+            o_info_calculator = OInfoCalculator(self.config)
             Odict = o_info_calculator.exhaustive_loop_zerolag(self.ts, self.config)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
@@ -65,7 +65,7 @@ class HOIToolbox:
         elif self.metric == "dOinfo":
             print("WARNING : NOT REFACTORED / OPTIMIZED YET")
             t = time.time()
-            d_o_info_calculator = DOInfoCalculator()
+            d_o_info_calculator = DOInfoCalculator(self.config)
             Odict = d_o_info_calculator.exhaustive_loop_lagged(self.ts, self.config)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
