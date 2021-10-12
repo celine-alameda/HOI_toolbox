@@ -1,14 +1,12 @@
 # Author: Pranav Mahajan, 2021
 
-import numpy as np
-import scipy.io
 import json
 import time
 import os
 
 from toolbox.utils import save_obj, load_obj
-from toolbox.Oinfo import exhaustive_loop_zerolag
-from toolbox.dOinfo import exhaustive_loop_lagged
+from toolbox.higher_order_information.Oinfo import exhaustive_loop_zerolag
+from toolbox.higher_order_information.dOinfo import exhaustive_loop_lagged
 
 ## Load .mat dataset
 # ts = scipy.io.loadmat(os.path.join('data','ts.mat'))

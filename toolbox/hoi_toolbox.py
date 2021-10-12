@@ -3,9 +3,9 @@ import numpy as np
 import pandas as pd
 import scipy.io
 import time
-from toolbox.Oinfo import OInfoCalculator
-from toolbox.dOinfo import DOInfoCalculator
-from toolbox.local_o_info import LocalOHOI
+from toolbox.higher_order_information.Oinfo import OInfoCalculator
+from toolbox.higher_order_information.dOinfo import DOInfoCalculator
+from toolbox.higher_order_information.local_o_info import LocalOHOI
 from toolbox.utils import save_obj, load_obj
 
 
