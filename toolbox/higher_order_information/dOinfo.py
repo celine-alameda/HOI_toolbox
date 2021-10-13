@@ -21,6 +21,7 @@ class DOInfoCalculator(HOI):
         # Y Nx1 target vector .  X NxM drivers
         # m order of the model
 
+        ### chunklength is used only for bootstrapping, otherwise it is 0
         if chunklength == 0:
             indsample = np.arange(len(Y))
         else:
