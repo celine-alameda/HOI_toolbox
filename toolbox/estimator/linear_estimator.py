@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from toolbox.estimator.estimator import Estimator
@@ -21,6 +23,10 @@ def lin_CE(Yb, Z):
 
 class LinearEstimator(Estimator):
 
+    pi = math.pi
+    e = math.e
+    log2pie = np.log(2 * pi * e)
+
     def estimate_cmi(self, y, x0, y0):
         y = y.T
         x0 = x0.T
@@ -42,5 +48,5 @@ class LinearEstimator(Estimator):
         else:
             det_covX = np.linalg.det(covX)
             N = x.shape[0]
-        e = 0.5 * np.log(det_covX) + 0.5 * N * np.log(2 * np.pi * np.exp(1))
-        return e
+        h = 0.5 * np.log(det_covX) + 0.5 * N * LinearEstimator.log2pie
+        return h

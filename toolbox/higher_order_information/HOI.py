@@ -1,5 +1,5 @@
-from toolbox.estimator.gcmi import GCMIEstimator
-from toolbox.estimator.lin_est import LinearEstimator
+from toolbox.estimator.gcmi_estimator import GCMIEstimator
+from toolbox.estimator.linear_estimator import LinearEstimator
 
 
 class HOI:

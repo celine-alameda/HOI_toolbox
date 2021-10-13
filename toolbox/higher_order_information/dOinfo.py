@@ -2,7 +2,7 @@ import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
-from toolbox.estimator.gcmi import copnorm
+from toolbox.estimator.gcmi_estimator import copnorm
 from toolbox.higher_order_information.HOI import HOI
 from toolbox.utils import bootci, CombinationsManager, ncr
 
