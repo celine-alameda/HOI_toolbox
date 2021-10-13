@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from toolbox.estimator.estimator import Estimator
 from toolbox.estimator.gcmi_estimator import GCMIEstimator
 from toolbox.estimator.linear_estimator import LinearEstimator
@@ -14,3 +16,7 @@ class HOI:
         else:
             print("Please use estimator out of the following - 'lin_est' or 'gcmi'")
             exit(1)
+
+    @abstractmethod
+    def run(self, data_frame, config):
+        pass

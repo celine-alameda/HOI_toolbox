@@ -5,6 +5,7 @@
 	"higher_order": false,
 	"estimator": "gcmi",
 	"modelorder":3,
+	"chunk_length":200,
 	"maxsize":6,
 	"n_best":20,
 	"nboot":1000

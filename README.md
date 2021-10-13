@@ -68,19 +68,30 @@ To run this toolbox on your input timeseries, ideally you'd only need to run the
 	"higher_order": true,
 	"estimator": "gcmi",
 	"modelorder":3,
+	"chunk_length":200,
 	"maxsize":4,
 	"n_best":10, 
 	"nboot":100
 }
 ```
-The "input_type" argument can either be mat or tsv. 
+The "input_type" argument can either be mat or tsv.
+
 The "input" directs to the path of the timeseries input. 
+
 Use the "metric" argument to choose which metric to compute, either "Oinfo" or "dOinfo". 
+
 The "higher_order" argument is a boolean (can be either true or false). By setting it true, the code will generate each subsequent combination iteratively and map the index to the variable combination using the combinatorial numbering system, rather than computing all possible combinations before hand and running out of memory. For example, 100 choose 5 is already 75287520 and a practical dataset is bound to have more than 100 ROIs/nodes/timeseries and using higher_order=true will enable to you to go to higher orders (much higher than 5) without running out of memory. But for smaller inputs that won't overwhelm your RAM, users are advised to set it to false as it makes it slightly easier to read the outputs (more details in `read_outputs.py`).
+
 The "estimator" argument can be either set to "gcmi" or "lin_est". If set to "gcmi", the code will use gaussian copula approach to compute entropy and mutual information or else if set to "lin_est" then the code will used covariance matrix based linear estimators. In certain scenarios, covariance matrix based estimators might be slightly faster, though cannot guarantee that yet.
+
 The "modelorder" argument is only relevant to dOinfo computation and not Oinfo computation, as it specifies the order of the timeseries/state vectors as in how many past timepoints to consider. Feel free to vary this argument according to your dataset.
+
+The "chunk_length" argument is only relevant to dOinfo computation and not dOinfo computation. It specifies ???
+
 The "maxsize" argument determines the max size of the multiplet to which it would do a brute-force/grid search and compute the outputs for all possible multiplet sizes less than maxsize. If you wish to go to higher orders, please increase this argument.
+
 The "n_best" argument helps you decide how many out top redundancy or synergy combinations (sorted in decreasing order of their magnitudes), do you want to include in the outputs. 
+
 The "nboot" argument determines how many bootstrap samples to compute theh histogram while determing the significance of the redundancy and synergy values.
 
 

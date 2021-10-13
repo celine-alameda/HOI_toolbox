@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
@@ -11,6 +10,7 @@ class DOInfoCalculator(HOI):
 
     def __init__(self, config):
         super().__init__(config)
+        self.chunk_length = config["chunk_length"]  # round(n_timepoints / 5) can play around with this
 
     def get_cmi(self, A, B, C):
         cmi = self.estimator.estimate_cmi(self, A, B, C)
@@ -66,7 +66,7 @@ class DOInfoCalculator(HOI):
         # sys.exit()
         return o
 
-    def exhaustive_loop_lagged(self, ts, config):
+    def run(self, ts, config):
         higher_order = config["higher_order"]
         Xfull = copnorm(ts)
         n_variables, n_timepoints = Xfull.shape
@@ -78,7 +78,7 @@ class DOInfoCalculator(HOI):
         maxsize = config["maxsize"]  # 4 # max number of variables in the multiplet
         n_best = config["n_best"]  # 10 # number of most informative multiplets retained
         nboot = config["nboot"]  # 100 # number of bootstrap samples
-        chunklength = round(n_timepoints / 5)  # can play around with this
+
         alphaval = 0.05
         o_b = np.zeros((nboot, 1))
 
@@ -142,13 +142,13 @@ class DOInfoCalculator(HOI):
                         for isel in range(n_sel):
                             if higher_order:
                                 indvar = H.number2combination(ind_pos[ind_pos_sort[isel]])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, chunklength,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
                                                                                  var_arr[indvar - 1] - 1)
                             else:
                                 indvar = np.squeeze(C[ind_pos[ind_pos_sort[isel]], :])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, chunklength,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
                                                                                  indvar - 1)
-                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - chunklength + 1), alphaval)
+                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1), alphaval)
                             boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                         Otot['sorted_red'] = Osort_pos[0:n_sel]
                         Otot['index_red'] = ind_pos[ind_pos_sort[0:n_sel]].flatten()
@@ -159,13 +159,13 @@ class DOInfoCalculator(HOI):
                         for isel in range(n_sel):
                             if higher_order:
                                 indvar = H.number2combination(ind_neg[ind_neg_sort[isel]])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, chunklength,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
                                                                                  var_arr[indvar - 1] - 1)
                             else:
                                 indvar = np.squeeze(C[ind_neg[ind_neg_sort[isel]], :])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, chunklength,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
                                                                                  indvar - 1)
-                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - chunklength + 1), alphaval)
+                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1), alphaval)
                             boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                         Otot['sorted_syn'] = Osort_neg[0:n_sel]
                         Otot['index_syn'] = ind_neg[ind_neg_sort[0:n_sel]].flatten()

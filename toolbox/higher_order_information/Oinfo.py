@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import itertools
 from tqdm.auto import tqdm
@@ -11,7 +10,6 @@ class OInfoCalculator(HOI):
 
     def __init__(self, config):
         super().__init__(config)
-
 
     def get_ent(self, x):
         entropy = self.estimator.estimate_entropy(x)
@@ -26,15 +24,15 @@ class OInfoCalculator(HOI):
         data = data[indices_variables, :]
         data = data[:, indices_sample]
 
-        M, N = data.shape
-        o = (M - 2) * self.get_ent(data)
+        m = data.shape[0]
+        o = (m - 2) * self.get_ent(data)
 
-        for j in range(M):
-            X1 = np.delete(data, j, axis=0)
-            o = o + self.get_ent(data[j, :]) - self.get_ent(X1)
+        for j in range(m):
+            x1 = np.delete(data, j, axis=0)
+            o = o + self.get_ent(data[j, :]) - self.get_ent(x1)
         return o
 
-    def exhaustive_loop_zerolag(self, ts, config):
+    def run(self, ts, config):
         higher_order = config["higher_order"]
         Xfull = copnorm(ts)
         n_variables, n_observations = Xfull.shape
