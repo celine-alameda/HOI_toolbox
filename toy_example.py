@@ -5,8 +5,8 @@ import time
 import os
 
 from toolbox.utils import save_obj, load_obj
-from toolbox.higher_order_information.Oinfo import exhaustive_loop_zerolag
-from toolbox.higher_order_information.dOinfo import exhaustive_loop_lagged
+from toolbox.higher_order_information.Oinfo import OInfoCalculator
+from toolbox.higher_order_information.dOinfo import DOInfoCalculator
 
 ## Load .mat dataset
 # ts = scipy.io.loadmat(os.path.join('data','ts.mat'))
@@ -16,29 +16,30 @@ from toolbox.higher_order_information.dOinfo import exhaustive_loop_lagged
 ## Load fmri dataset processed by brainlife pipeline
 from numpy import genfromtxt
 import pandas as pd
+
 df = pd.read_csv("data/timeseries.tsv.gz", compression='gzip', delimiter='\t')
 df = df.loc[:, (df != 0.0).any(axis=0)]
-df.to_csv('data/cleaned_timeseries.tsv', sep='\t',index=False)
+df.to_csv('data/cleaned_timeseries.tsv', sep='\t', index=False)
 ts = genfromtxt('data/cleaned_timeseries.tsv', delimiter='\t', )
-ts = ts[1:,:10].T # ideally has 101 variables, 152 timepoints; but using only first 10
-
+ts = ts[1:, :10].T  # ideally has 101 variables, 152 timepoints; but using only first 10
 
 configFilename = "config.json"
 outputDirectory = "output"
-if(not os.path.exists(outputDirectory)):
-		os.makedirs(outputDirectory)
+if (not os.path.exists(outputDirectory)):
+    os.makedirs(outputDirectory)
 
 with open(configFilename, "r") as fd:
-		config = json.load(fd)
+    config = json.load(fd)
 
-if("metric" in config):
-	metric = config["metric"]
+if ("metric" in config):
+    metric = config["metric"]
 else:
-	metric = "Oinfo"
+    metric = "Oinfo"
 
 if metric == "Oinfo":
     t = time.time()
-    Odict = exhaustive_loop_zerolag(ts, config)
+    o_info_calc = OInfoCalculator(config)
+    Odict = o_info_calc.exhaustive_loop_zerolag(ts, config)
     elapsed = time.time() - t
     print("Elapsed time is ", elapsed, " seconds.")
     save_obj(Odict, 'Odict_Oinfo_higher_order')
@@ -47,7 +48,8 @@ if metric == "Oinfo":
 
 if metric == "dOinfo":
     t = time.time()
-    Odict = exhaustive_loop_lagged(ts, config)
+    do_info_calc = DOInfoCalculator(config)
+    Odict = do_info_calc.exhaustive_loop_lagged(ts, config)
     elapsed = time.time() - t
     print("Elapsed time is ", elapsed, " seconds.")
     save_obj(Odict, 'Odict_dOinfo_higher_order')
@@ -70,5 +72,3 @@ if metric == "dOinfo":
 #     print(comb)
 #     print(num)
 #     print(comb_ret)
-
-

@@ -27,6 +27,9 @@ class LinearEstimator(Estimator):
     e = math.e
     log2pie = np.log(2 * pi * e)
 
+    def __init__(self):
+        self.type = "linear"
+
     def estimate_cmi(self, y, x0, y0):
         y = y.T
         x0 = x0.T

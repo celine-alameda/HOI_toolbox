@@ -629,6 +629,9 @@ def gccmi_ccd(x, y, z, Zm):
 
 class GCMIEstimator(Estimator):
 
+    def __init__(self):
+        self.type = "GCMI"
+
     def estimate_entropy(self, x):
         """Entropy of a Gaussian variable in bits
 

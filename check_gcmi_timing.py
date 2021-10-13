@@ -1,9 +1,9 @@
 import numpy as np
 import time
-from toolbox.estimator.gcmi_estimator import copnorm, ent_g
-from toolbox.estimator.linear_estimator import lin_ent
+from toolbox.estimator.gcmi_estimator import copnorm, GCMIEstimator
 
 ## Check timing for entropy computation
+from toolbox.estimator.linear_estimator import LinearEstimator
 
 N = 10000 # 817
 
@@ -18,14 +18,16 @@ X = np.random.randn(M,N) # note the difference -
 # X = ts[:,:].T
 
 t = time.time()
-e = lin_ent(X)
+estimator = LinearEstimator()
+e = estimator.estimate_entropy(X)
 elapsed = time.time() - t
 print("Covariance matrix based: Elapsed time is ", elapsed, " seconds.")
 print(e)
 
 t = time.time()
 X = copnorm(X)
-entropy = ent_g(X)
+estimator = GCMIEstimator()
+entropy = estimator.estimate_entropy(X)
 elapsed = time.time() - t
 print("GCMI based: Elapsed time is ", elapsed, " seconds.")
 print(entropy)

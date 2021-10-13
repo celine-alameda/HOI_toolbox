@@ -13,11 +13,11 @@ class OInfoCalculator(HOI):
         super().__init__(config)
 
 
-    def get_ent(self, X, estimator):
-        entropy = self.estimator.estimate_entropy(X)
+    def get_ent(self, x):
+        entropy = self.estimator.estimate_entropy(x)
         return entropy
 
-    def o_information_boot(self, data, indices_sample, indices_variables, estimator):
+    def o_information_boot(self, data, indices_sample, indices_variables):
         # this function takes the whole X as input, and additionally the indices
         # convenient for bootstrap
         # X size is M(variables) x N (samples)
@@ -27,21 +27,20 @@ class OInfoCalculator(HOI):
         data = data[:, indices_sample]
 
         M, N = data.shape
-        o = (M - 2) * self.get_ent(data, estimator)
+        o = (M - 2) * self.get_ent(data)
 
         for j in range(M):
             X1 = np.delete(data, j, axis=0)
-            o = o + self.get_ent(data[j, :], estimator) - self.get_ent(X1, estimator)
+            o = o + self.get_ent(data[j, :]) - self.get_ent(X1)
         return o
 
     def exhaustive_loop_zerolag(self, ts, config):
         higher_order = config["higher_order"]
-        estimator = config["estimator"]
         Xfull = copnorm(ts)
         n_variables, n_observations = Xfull.shape
         print("Timeseries details - Number of variables: ", str(n_variables), ", Number of timepoints: ",
               str(n_observations))
-        print("Computing Oinfo using " + estimator + " estimator")
+        print("Computing Oinfo using " + self.estimator.type + " estimator")
         X = Xfull
         maxsize = config["maxsize"]  # 5 # max number of variables in the multiplet
         n_best = config["n_best"]  # 10 # number of most informative multiplets retained
@@ -76,7 +75,7 @@ class OInfoCalculator(HOI):
                 for combination_index in tqdm(range(n_combinations), desc="Inner loop, computing O", leave=False):
                     if higher_order:
                         comb = combinations_manager.nextchoose()
-                        o_array = self.o_information_boot(X, range(n_observations), comb - 1, estimator)
+                        o_array = self.o_information_boot(X, range(n_observations), comb - 1)
                         valpos, ipos = np.min(o_positive), np.argmin(o_positive)
                         valneg, ineg = np.max(o_negative), np.argmax(o_negative)
                         if o_array > 0 and o_array > valpos:
@@ -87,8 +86,7 @@ class OInfoCalculator(HOI):
                             ind_neg[ineg] = combinations_manager.combination2number(comb)
                     else:
                         comb = combinations[combination_index, :]
-                        o_array[combination_index] = self.o_information_boot(X, range(n_observations), comb - 1,
-                                                                             estimator)
+                        o_array[combination_index] = self.o_information_boot(X, range(n_observations), comb - 1)
 
                 if higher_order:
                     Osort_pos, ind_pos_sort = np.sort(o_positive)[::-1], np.argsort(o_positive)[::-1]
@@ -109,7 +107,7 @@ class OInfoCalculator(HOI):
                             indvar = combinations_manager.number2combination(ind_pos[ind_pos_sort[isel]])
                         else:
                             indvar = np.squeeze(combinations[ind_pos[ind_pos_sort[isel]], :])
-                        f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1, estimator)
+                        f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1)
                         ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
                         boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                     o_for_nplet_size['sorted_red'] = Osort_pos[0:n_sel]
@@ -125,7 +123,7 @@ class OInfoCalculator(HOI):
                             # All combinations with a negative O, in order.
                             indvar = np.squeeze(combinations[ind_neg[ind_neg_sort[isel]], :])
                         # -1 because combinations start at 1
-                        f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1, estimator)
+                        f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1)
                         ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
                         boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                     o_for_nplet_size['sorted_syn'] = Osort_neg[0:n_sel]
