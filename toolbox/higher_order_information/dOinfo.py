@@ -11,16 +11,19 @@ class DOInfoCalculator(HOI):
     def __init__(self, config):
         super().__init__(config)
         self.chunk_length = config["chunk_length"]  # round(n_timepoints / 5) can play around with this
+        self.order = config["modelorder"]
 
     def get_cmi(self, A, B, C):
         cmi = self.estimator.estimate_cmi(self, A, B, C)
         return cmi
 
-    def o_information_lagged_boot(self, Y, X, m, indstart, chunklength, indvar):
+    def compute_dynamic_o(self, Y, X, indstart, indvar):
+        return self.o_information_lagged_boot(Y, X, indstart, 0, indvar)
+
+    def o_information_lagged_boot(self, Y, X, indstart, chunklength, indvar):
         # evaluates the o_information flow
         # Y Nx1 target vector .  X NxM drivers
         # m order of the model
-
         ### chunklength is used only for bootstrapping, otherwise it is 0
         if chunklength == 0:
             indsample = np.arange(len(Y))
@@ -42,17 +45,17 @@ class DOInfoCalculator(HOI):
         X = X[:, indvar]
         N, M = X.shape
 
-        n = N - m
-        X0 = np.zeros((n, m, M))
-        Y0 = np.zeros((n, m))
-        y = np.array([Y[m:]])
+        n = N - self.order
+        X0 = np.zeros((n, self.order, M))
+        Y0 = np.zeros((n, self.order))
+        y = np.array([Y[self.order:]])
         for i in range(n):
-            for j in range(m):
-                Y0[i, j] = Y[m - j + i - 1]
+            for j in range(self.order):
+                Y0[i, j] = Y[self.order - j + i - 1]
                 for k in range(M):
-                    X0[i, j, k] = X[m - j + i - 1, k]
+                    X0[i, j, k] = X[self.order - j + i - 1, k]
 
-        X0_reshaped = np.reshape(np.ravel(X0, order='F'), (n, m * M), order='F').T
+        X0_reshaped = np.reshape(np.ravel(X0, order='F'), (n, self.order * M), order='F').T
         Y0 = Y0.T
         # print(X0_reshaped.shape)
         # print(y.shape)
@@ -61,7 +64,7 @@ class DOInfoCalculator(HOI):
         # print(o)
         for k in range(M):
             X = np.delete(X0, k, axis=2)
-            X_reshaped = np.reshape(np.ravel(X, order='F'), (n, m * (M - 1)), order='F').T
+            X_reshaped = np.reshape(np.ravel(X, order='F'), (n, self.order * (M - 1)), order='F').T
             o = o + self.get_cmi(y, X_reshaped, Y0)
         # print(o)
         # sys.exit()
@@ -75,7 +78,6 @@ class DOInfoCalculator(HOI):
               str(n_timepoints))
         print("Computing dOinfo using " + self.estimator.type + " estimator")
         X = Xfull.T
-        modelorder = config["modelorder"]  # 3 # check this
         maxsize = config["maxsize"]  # 4 # max number of variables in the multiplet
         n_best = config["n_best"]  # 10 # number of most informative multiplets retained
         nboot = config["nboot"]  # 100 # number of bootstrap samples
@@ -113,7 +115,7 @@ class DOInfoCalculator(HOI):
                     for icomb in tqdm(range(ncomb), desc="Inner loop, computing O", leave=False):
                         if higher_order:
                             comb = H.nextchoose()
-                            Osize = self.o_information_lagged_boot(t, X, modelorder, np.arange(n_timepoints), 0,
+                            Osize = self.compute_dynamic_o(t, X, np.arange(n_timepoints),
                                                                    var_arr[comb - 1] - 1)
                             valpos, ipos = np.min(O_pos), np.argmin(O_pos)
                             valneg, ineg = np.max(O_neg), np.argmax(O_neg)
@@ -125,7 +127,7 @@ class DOInfoCalculator(HOI):
                                 ind_neg[ineg] = H.combination2number(comb)
                         else:
                             comb = C[icomb, :]
-                            Osize[icomb] = self.o_information_lagged_boot(t, X, modelorder, np.arange(n_timepoints), 0,
+                            Osize[icomb] = self.compute_dynamic_o(t, X, np.arange(n_timepoints),
                                                                           comb - 1)
                     if higher_order:
                         Osort_pos, ind_pos_sort = np.sort(O_pos)[::-1], np.argsort(O_pos)[::-1]
@@ -143,13 +145,14 @@ class DOInfoCalculator(HOI):
                         for isel in range(n_sel):
                             if higher_order:
                                 indvar = H.number2combination(ind_pos[ind_pos_sort[isel]])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, xsamp, self.chunk_length,
                                                                                  var_arr[indvar - 1] - 1)
                             else:
                                 indvar = np.squeeze(C[ind_pos[ind_pos_sort[isel]], :])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, xsamp, self.chunk_length,
                                                                                  indvar - 1)
-                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1), alphaval)
+                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1),
+                                                        alphaval)
                             boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                         Otot['sorted_red'] = Osort_pos[0:n_sel]
                         Otot['index_red'] = ind_pos[ind_pos_sort[0:n_sel]].flatten()
@@ -160,13 +163,14 @@ class DOInfoCalculator(HOI):
                         for isel in range(n_sel):
                             if higher_order:
                                 indvar = H.number2combination(ind_neg[ind_neg_sort[isel]])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, xsamp, self.chunk_length,
                                                                                  var_arr[indvar - 1] - 1)
                             else:
                                 indvar = np.squeeze(C[ind_neg[ind_neg_sort[isel]], :])
-                                f = lambda xsamp: self.o_information_lagged_boot(t, X, modelorder, xsamp, self.chunk_length,
+                                f = lambda xsamp: self.o_information_lagged_boot(t, X, xsamp, self.chunk_length,
                                                                                  indvar - 1)
-                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1), alphaval)
+                            ci_lower, ci_upper = bootci(nboot, f, np.arange(n_timepoints - self.chunk_length + 1),
+                                                        alphaval)
                             boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
                         Otot['sorted_syn'] = Osort_neg[0:n_sel]
                         Otot['index_syn'] = ind_neg[ind_neg_sort[0:n_sel]].flatten()
