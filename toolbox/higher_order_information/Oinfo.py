@@ -3,7 +3,7 @@ import itertools
 from tqdm.auto import tqdm
 from toolbox.estimator.gcmi_estimator import copnorm
 from toolbox.higher_order_information.HOI import HOI
-from toolbox.utils import bootci, CombinationsManager, ncr
+from toolbox.utils import bootci, CombinationsManager, ncr, boot_samples, bootstrap_ci
 
 
 class OInfoCalculator(HOI):
@@ -105,9 +105,17 @@ class OInfoCalculator(HOI):
                             indvar = combinations_manager.number2combination(ind_pos[ind_pos_sort[isel]])
                         else:
                             indvar = np.squeeze(combinations[ind_pos[ind_pos_sort[isel]], :])
-                        f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1)
-                        ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
-                        boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)
+                        samples = boot_samples(nboot, range(n_observations))
+                        o_values = []
+                        for sample in sample:
+                            o_value = self.o_information_boot(X, sample, indvar - 1)
+                            o_values.append(o_value)
+                        ci = bootstrap_ci(o_values, alphaval)
+                        ci_lower = ci[0]
+                        ci_upper = ci[1]
+                        # f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1)
+                        # ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
+                        boot_sig[isel] = ci_lower > 0 or ci_upper < 0
                     o_for_nplet_size['sorted_red'] = Osort_pos[0:n_sel]
                     o_for_nplet_size['index_red'] = ind_pos[ind_pos_sort[0:n_sel]].flatten()
                     o_for_nplet_size['bootsig_red'] = boot_sig
@@ -121,6 +129,7 @@ class OInfoCalculator(HOI):
                             # All combinations with a negative O, in order.
                             indvar = np.squeeze(combinations[ind_neg[ind_neg_sort[isel]], :])
                         # -1 because combinations start at 1
+                        # todo replace this lambda like in lines 114-117
                         f = lambda xsamp: self.o_information_boot(X, xsamp, indvar - 1)
                         ci_lower, ci_upper = bootci(nboot, f, range(n_observations), alphaval)
                         boot_sig[isel] = not (ci_lower <= 0 and ci_upper > 0)

@@ -7,6 +7,22 @@ import operator as op
 from functools import reduce
 
 
+def boot_samples(nboot, xsamp_range):
+    samples = list()
+    for i in range(nboot):
+        sample = resample(xsamp_range, n_samples=len(xsamp_range))
+        samples.append(sample)
+    return samples
+
+
+def bootstrap_ci(values_list, alpha):
+    p = (alpha / 2.0) * 100
+    lower = np.percentile(values_list, p)
+    p = (1 - alpha / 2.0) * 100
+    upper = np.percentile(values_list, p)
+    return [lower, upper]
+
+
 def bootci(nboot, oinfo_func, xsamp_range, alpha):
     stats = list()
     for i in range(nboot):
