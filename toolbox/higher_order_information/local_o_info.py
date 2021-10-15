@@ -6,6 +6,8 @@ import numpy as np
 
 import pandas as pd
 from sklearn.utils import resample
+from tqdm import tqdm
+
 from toolbox.states_probabilities import StatesProbabilities
 
 
@@ -14,13 +16,9 @@ def local_o_state(data, state_probability):
     system_probability = state_probability.get_probability(list(range(n_variables)), data)
     local_o = (n_variables - 2) * math.log2(system_probability)
     for index_variable in range(n_variables):
-        variable_list = []
-        no_variable_list = []
-        for j in range(n_variables):
-            if j == index_variable:
-                variable_list.append(j)
-            else:
-                no_variable_list.append(j)
+        variable_list = [index_variable]
+        no_variable_list = list(range(n_variables))
+        no_variable_list.remove(index_variable)
         data_var = [data[index_variable]]
         variable_probability = state_probability.get_probability(variable_list, data_var)
         data_no_var = data.copy()
@@ -50,14 +48,14 @@ class LocalOHOI:
         upper_cis = []
         n_rows = data_table.shape[0]
         states_probability = StatesProbabilities(data_table)
-        for index_sample, row in data_table.iterrows():
+        for index_sample, row in tqdm(data_table.iterrows()):
             local_o = local_o_state(row, states_probability)
             local_os.append(local_o)
         # significances
         # local o bootstrap
         if self.bootstrap:
             local_o_bootstraps = pd.DataFrame()
-            for _ in range(100):
+            for _ in tqdm(range(100)):
                 local_o_bootstrap = {}
                 # todo replace 100 by n_boot
                 sample = resample(range(n_rows), n_samples=len(range(n_rows)))
