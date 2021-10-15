@@ -24,9 +24,6 @@ local_o_info = load_obj(save_name)
 
 print("Local o info readout, object {}".format(save_name))
 
-data["Local o"] = local_o_info["local_o"]
-data["sig"] = local_o_info["significances"]
-data["lower_ci"] = local_o_info["lower_ci"]
-data["upper_ci"] = local_o_info["upper_ci"]
-output_file_name = save_name + ".xlsx"
-data.to_excel(output_file_name)
+data = pd.DataFrame(local_o_info).transpose()
+data.to_csv(save_name.split('.')[0]+".tsv", sep='\t', index=False)
+

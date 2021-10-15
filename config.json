@@ -1,7 +1,6 @@
 {
 	"input_type": "tsv",	
 	"input": "scenario1bis.tsv",
-	"probability_distribution_input": "baseline.tsv",
 	"metric": "local_o",
 	"higher_order": false,
 	"estimator": "gcmi",

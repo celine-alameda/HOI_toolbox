@@ -22,11 +22,10 @@ with open(configFilename, "r") as fd:
 tb = HOIToolbox(config)
 
 for i in range(1, 160):
-    file_input = "scenario1bis_trial_" + str(i) + "_" + "sound" + ".tsv"
-    probability_distribution_input = "scenario1bis_trial_" + str(i) + "_" + "baseline" + ".tsv"
+    file_input = "scenario1bis_trial_" + str(i) + ".tsv"
+    probability_distribution_input = "scenario1bis_trial_" + str(i) + ".tsv"
     print("using " + file_input)
     tb.config["input"] = file_input
-    tb.config["probability_distribution_input"] = probability_distribution_input
     tb.run()
 
     # data = pd.read_table("data/" + file_name)

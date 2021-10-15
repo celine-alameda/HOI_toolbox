@@ -8,14 +8,14 @@ import scipy.stats
 
 class StatesProbabilities:
 
-    def __init__(self, data_table: pd.DataFrame, baseline_table : pd.DataFrame):
+    def __init__(self, empirical_observations: pd.DataFrame):
         """initializes the StateProbability object
         Parameters
         ----------
-        data_table : pd.DataFrame
-            the array with all variables and observations"""
-        self._baseline_table = baseline_table
-        self._data_table = data_table
+        empirical_observations : pd.DataFrame
+            the array to use for probability computing"""
+
+        self._data_table = empirical_observations
         self._all_probability_density_functions = {}
 
     def get_probability(self, which_variables, values) -> float:
@@ -37,5 +37,5 @@ class StatesProbabilities:
         return kde.pdf(values)
 
     def _create_kde(self, which_variables):
-        data_necessary = self._baseline_table.iloc[:, which_variables]
+        data_necessary = self._data_table.iloc[:, which_variables]
         return scipy.stats.gaussian_kde(data_necessary.T)

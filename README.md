@@ -147,9 +147,6 @@ The "input_type" argument can either be mat or tsv.
 
 The "input" directs to the path of the timeseries input.
 
-The "probability_distribution_input" directs to the path of the file whose data will be used to compute the probability
-distributions, needed for the local O computation. It is only needed for local o computation.
-
 Use the "metric" argument to choose which metric to compute, either "Oinfo" or "dOinfo".
 
 The "higher_order" argument is a boolean (can be either true or false). By setting it true, the code will generate each

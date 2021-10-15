@@ -67,11 +67,10 @@ class HOIToolbox:
 
         elif self.config["metric"] == "local_o":
             t = time.time()
-            ts = pd.DataFrame(self.ts.transpose())
-            baseline_file = "data/" + self.config["probability_distribution_input"]
-            baseline = pd.read_csv(baseline_file, sep='\t')
-            local_o_hoi = LocalOHOI(bootstrap=False)
-            local_o = local_o_hoi.exhaustive_local_o(ts, baseline)
+            ts = pd.read_csv("data/"+self.config["input"], sep='\t')
+            #ts = pd.DataFrame(self.ts.transpose())
+            local_o_hoi = LocalOHOI(time_dimension="datapoint", trial_dimension="trial")
+            local_o = local_o_hoi.exhaustive_local_o(ts)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
             print("Saving " + output_file + " and trying to load again")

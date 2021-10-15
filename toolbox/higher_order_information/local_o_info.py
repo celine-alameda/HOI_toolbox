@@ -13,6 +13,7 @@ from toolbox.states_probabilities import StatesProbabilities
 
 def local_o_state(data, state_probability):
     n_variables = data.shape[0]
+    data = data.to_list()
     system_probability = state_probability.get_probability(list(range(n_variables)), data)
     local_o = (n_variables - 2) * math.log2(system_probability)
     for index_variable in range(n_variables):
@@ -30,11 +31,13 @@ def local_o_state(data, state_probability):
 
 class LocalOHOI:
 
-    def __init__(self, bootstrap):
-        self.bootstrap = bootstrap
+    def __init__(self, time_dimension, trial_dimension):
+        self.bootstrap = False  # todo remove this argument and associated logic
+        self.time_dimension = time_dimension
+        self.trial_dimension = trial_dimension
 
     # todo add some check to see if baseline table has the same columns as data_table
-    def exhaustive_local_o(self, data_table: pd.DataFrame, baseline_table : pd.DataFrame):
+    def exhaustive_local_o(self, data_table: pd.DataFrame):
         """Computes local o information and significance for all data states in data_table.
             Returns
             -------
@@ -42,46 +45,20 @@ class LocalOHOI:
                 (local_o ci including 0 or not)
         """
 
-        alpha = 0.05
-        local_os = []
-        significances = []
-        lower_cis = []
-        upper_cis = []
-        n_rows = data_table.shape[0]
-        states_probability = StatesProbabilities(data_table, baseline_table)
-        for index_sample, row in tqdm(data_table.iterrows()):
-            local_o = local_o_state(row, states_probability)
-            local_os.append(local_o)
-        # significances
-        # local o bootstrap
-        if self.bootstrap:
-            local_o_bootstraps = pd.DataFrame()
-            for _ in tqdm(range(100)):
-                local_o_bootstrap = {}
-                # todo replace 100 by n_boot
-                sample = resample(range(n_rows), n_samples=len(range(n_rows)))
-                s_data = pd.DataFrame(data_table.iloc[sample, :])
-                # new definition of probabilities based on the sampled data
-                states_probability = StatesProbabilities(s_data)
-                # for each s_data, evaluate the local o of each row
-                for index_sample, row in data_table.iterrows():
-                    local_o = local_o_state(row, states_probability)
-                    local_o_bootstrap[index_sample] = local_o
-                local_o_bootstraps = local_o_bootstraps.append(local_o_bootstrap, ignore_index=True)
-            # each row of the original dataframe is a col in the local_o_bootstraps
-            for index_sample in range(n_rows):
-                boostraps_for_sample = local_o_bootstraps.iloc[:, index_sample]
-                stats = boostraps_for_sample.values.tolist()
-                print(stats)
-                p = (alpha / 2.0) * 100
-                lower = np.percentile(stats, p)
-                lower_cis.append(lower)
-                p = (1 - alpha / 2.0) * 100
-                upper = np.percentile(stats, p)
-                upper_cis.append(upper)
-                sig = 0 if lower <= 0 <= upper else 1
-                significances.append(sig)
-        return_object = {"local_o": local_os, "significances": significances, "lower_ci": lower_cis,
-                         "upper_ci": upper_cis} if self.bootstrap else {"local_o": local_os}
-        # confidence intervals for each row
-        return return_object
+        time_points = data_table[self.time_dimension].unique()
+        trial_points = data_table[self.trial_dimension].unique()
+        local_o_timepoints = []
+        for time_point in tqdm(time_points):
+            empirical_observations = data_table.loc[data_table[self.time_dimension] == time_point]
+            empirical_observations = empirical_observations.iloc[:, 2:empirical_observations.shape[1]]
+            states_probability = StatesProbabilities(empirical_observations)
+            local_os = []
+            for trial_point in trial_points:
+                # get the row corresponding to time_point and trial_point
+                data = data_table.loc[
+                    (data_table[self.time_dimension] == time_point) & (data_table[self.trial_dimension] == trial_point)]
+                data = data.iloc[:, 2:data.shape[1]].iloc[0]
+                local_o = local_o_state(data, states_probability)
+                local_os.append(local_o)
+            local_o_timepoints.append(local_os)
+        return local_o_timepoints
