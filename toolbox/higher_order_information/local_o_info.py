@@ -33,7 +33,8 @@ class LocalOHOI:
     def __init__(self, bootstrap):
         self.bootstrap = bootstrap
 
-    def exhaustive_local_o(self, data_table: pd.DataFrame):
+    # todo add some check to see if baseline table has the same columns as data_table
+    def exhaustive_local_o(self, data_table: pd.DataFrame, baseline_table : pd.DataFrame):
         """Computes local o information and significance for all data states in data_table.
             Returns
             -------
@@ -47,7 +48,7 @@ class LocalOHOI:
         lower_cis = []
         upper_cis = []
         n_rows = data_table.shape[0]
-        states_probability = StatesProbabilities(data_table)
+        states_probability = StatesProbabilities(data_table, baseline_table)
         for index_sample, row in tqdm(data_table.iterrows()):
             local_o = local_o_state(row, states_probability)
             local_os.append(local_o)

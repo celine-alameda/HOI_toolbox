@@ -7,7 +7,7 @@ import pandas as pd
 from toolbox.utils import load_obj, CombinationsManager
 
 for i in range(1, 160):
-    file_name = "scenario1bis_trial_" + str(i) + ".tsv"
+    file_name = "scenario1bis_trial_" + str(i) + "_sound.tsv"
     print("using " + file_name)
 
     data = pd.read_table("data/" + file_name)
@@ -22,3 +22,4 @@ for i in range(1, 160):
     #data["upper_ci"] = local_o_info["upper_ci"]
     output_file_name = save_name + ".tsv"
     data.to_csv(output_file_name, sep='\t', index=False)
+    print("saved to "+output_file_name)

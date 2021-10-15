@@ -14,33 +14,25 @@ class HOIToolbox:
     def __init__(self, config):
         """Create a new HOI Toolbox object, using a configuration file"""
         self.config = config
-        if "metric" in config:
-            self.metric = config["metric"]
-        else:
+        if "metric" not in config:
             print("ERROR : no metric specified")
             exit(1)
-
-        if "input" in config:
-            self.file_name = config["input"]
-        else:
+        if "input" not in config:
             print("Please provide input data location in config")
             exit(1)
-
-        if "input_type" in config:
-            self.input_type = config["input_type"]
-        else:
-            self.input_type = "tsv"
+        if "input_type" not in config:
+            self.config["input_type"] = "tsv"
 
     def run(self):
-        input_file = "data/" + self.file_name
-        if self.input_type == "tsv":
+        input_file = "data/" + self.config["input"]
+        if self.config["input_type"] == "tsv":
             # df = pd.read_csv("data/timeseries.tsv.gz", compression='gzip', delimiter='\t')
             # df = df.loc[:, (df != 0.0).any(axis=0)]
             # df.to_csv('data/cleaned_timeseries.tsv', sep='\t',index=False)
             ts = np.genfromtxt(input_file, delimiter='\t', )
             self.ts = ts[1:, :].T
         # print(ts.shape)
-        elif self.input_type == "mat":
+        elif self.config["input_type"] == "mat":
             ts = scipy.io.loadmat(input_file)
             ts = np.array(ts['ts'])
             self.ts = ts.T
@@ -48,9 +40,9 @@ class HOIToolbox:
         else:
             print("Unknown input type")
             exit(1)
-        output_file = self.metric + "_" + self.file_name.split(".")[0]
+        output_file = self.config["metric"] + "_" + self.config["input"].split(".")[0]
 
-        if self.metric == "Oinfo":
+        if self.config["metric"] == "Oinfo":
             t = time.time()
             o_info_calculator = OInfoCalculator(self.config)
             Odict = o_info_calculator.run(self.ts, self.config)
@@ -62,7 +54,7 @@ class HOIToolbox:
             Odict_Oinfo = load_obj('Odict_Oinfo')
             print("Done.")
 
-        elif self.metric == "dOinfo":
+        elif self.config["metric"] == "dOinfo":
             print("WARNING : NOT REFACTORED / OPTIMIZED YET")
             t = time.time()
             d_o_info_calculator = DOInfoCalculator(self.config)
@@ -73,11 +65,13 @@ class HOIToolbox:
             Odict_dOinfo = load_obj('Odict_dOinfo')
             print(Odict_dOinfo)
 
-        elif self.metric == "local_o":
+        elif self.config["metric"] == "local_o":
             t = time.time()
             ts = pd.DataFrame(self.ts.transpose())
+            baseline_file = "data/" + self.config["probability_distribution_input"]
+            baseline = pd.read_csv(baseline_file, sep='\t')
             local_o_hoi = LocalOHOI(bootstrap=False)
-            local_o = local_o_hoi.exhaustive_local_o(ts)
+            local_o = local_o_hoi.exhaustive_local_o(ts, baseline)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
             print("Saving " + output_file + " and trying to load again")

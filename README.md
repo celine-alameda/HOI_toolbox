@@ -131,6 +131,7 @@ details about timeseries path, type and parameters/arguments in the config.json,
 {
 	"input_type": "tsv",	
 	"input": "data/timeseries.tsv.gz",
+	"probability_distribution_input" : "baseline.tsv"
 	"metric": "dOinfo",
 	"higher_order": true,
 	"estimator": "gcmi",
@@ -145,6 +146,9 @@ details about timeseries path, type and parameters/arguments in the config.json,
 The "input_type" argument can either be mat or tsv.
 
 The "input" directs to the path of the timeseries input.
+
+The "probability_distribution_input" directs to the path of the file whose data will be used to compute the probability
+distributions, needed for the local O computation. It is only needed for local o computation.
 
 Use the "metric" argument to choose which metric to compute, either "Oinfo" or "dOinfo".
 
