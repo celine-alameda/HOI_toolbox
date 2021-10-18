@@ -55,15 +55,14 @@ class HOIToolbox:
             print("Done.")
 
         elif self.config["metric"] == "dOinfo":
-            print("WARNING : NOT REFACTORED / OPTIMIZED YET")
             t = time.time()
             d_o_info_calculator = DOInfoCalculator(self.config)
-            Odict = d_o_info_calculator.run(self.ts, self.config)
+            dOdict = d_o_info_calculator.run(self.ts, self.config)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")
-            save_obj(Odict, 'Odict_dOinfo')
-            Odict_dOinfo = load_obj('Odict_dOinfo')
-            print(Odict_dOinfo)
+            save_name = self.config["input"].split(".")[0] + "_dO"
+            save_obj(dOdict, save_name)
+            print("done.")
 
         elif self.config["metric"] == "local_o":
             t = time.time()

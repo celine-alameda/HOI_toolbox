@@ -14,7 +14,7 @@ class DOInfoCalculator(HOI):
         self.order = config["modelorder"]
 
     def get_cmi(self, A, B, C):
-        cmi = self.estimator.estimate_cmi(self, A, B, C)
+        cmi = self.estimator.estimate_cmi(A, B, C)
         return cmi
 
     def compute_dynamic_o(self, Y, X, indstart, indvar):

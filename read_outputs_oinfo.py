@@ -17,7 +17,7 @@ if (argCount > 1):
 with open(configFilename, "r") as fd:
     config = json.load(fd)
 
-data = pd.read_table(config["input"])
+data = pd.read_table("data/"+config["input"])
 variable_names = list(data.columns)
 save_name = config["input"].split(".")[0] + "_O"
 o_info_dict = load_obj(save_name)

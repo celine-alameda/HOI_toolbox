@@ -1,10 +1,10 @@
 {
 	"input_type": "tsv",	
-	"input": "scenario1bis.tsv",
-	"metric": "local_o",
+	"input": "scenario4_band_p.tsv",
+	"metric": "dOinfo",
 	"higher_order": false,
 	"estimator": "gcmi",
-	"modelorder":3,
+	"modelorder":10,
 	"chunk_length":200,
 	"maxsize":6,
 	"n_best":20,
