@@ -1,6 +1,7 @@
 """Local O information computation.
     Work in progress.
  """
+import concurrent.futures
 import math
 import numpy as np
 
@@ -45,9 +46,45 @@ class LocalOHOI:
         """
 
         n_data_points = data_table.shape[0]
-        local_os = []
-        for data_point in tqdm(range(n_data_points)):
-            state = data_table.iloc[data_point]
-            local_o = local_o_of_state(state, self.probability_estimator)
-            local_os.append(local_o)
+        chunked_data_points = create_n_chunks(n_data_points, 1000)
+        local_os = [0 for _ in range(n_data_points)]
+        n_data_computed = 0
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+            future_chunked_local_os = {executor.submit(self._local_o_for_chunk, data_table, chunk): chunk for chunk in
+                                       chunked_data_points}
+            for future in concurrent.futures.as_completed(future_chunked_local_os):
+                chunked_local_os = future_chunked_local_os[future]
+                try:
+                    data = future.result()
+                    for index in data:
+                        local_os[index] = data[index]
+                    n_data_computed += len(data)
+                    print("{} data computed".format(n_data_computed))
+                except Exception as exc:
+                    print('%r generated an exception: %s' % (chunked_local_os, exc))
+                # else:
+                #    print('%r page is %d bytes' % (chunked_local_os, len(data)))
         return local_os
+
+    def _local_o_for_chunk(self, data_table: pd.DataFrame, chunk_of_indices):
+        return_dict = {}
+        for index in chunk_of_indices:
+            state = data_table.iloc[index]
+            local_o = local_o_of_state(state, self.probability_estimator)
+            return_dict[index] = local_o
+        return return_dict
+
+
+def create_n_chunks(n_data, chunk_size):
+    """ Creates chunks of chunk_size data.
+    The data that did not fit, i.e n_data % chunk_size, will land in the last one.
+    """
+    chunks = []
+    counter = 0
+    while counter < n_data:
+        if counter + chunk_size < n_data:
+            chunks.append(list(range(counter, counter + chunk_size)))
+        else:
+            chunks.append(list(range(counter, n_data)))
+        counter = counter + chunk_size
+    return chunks
