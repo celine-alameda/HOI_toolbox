@@ -1,7 +1,7 @@
 {
 	"input_type": "tsv",	
-	"input": "scenario4_band_p.tsv",
-	"metric": "dOinfo",
+	"input": "3_unf.tsv",
+	"metric": "local_o",
 	"higher_order": false,
 	"estimator": "gcmi",
 	"modelorder":10,

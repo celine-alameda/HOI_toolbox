@@ -6,6 +6,7 @@ import time
 from toolbox.higher_order_information.Oinfo import OInfoCalculator
 from toolbox.higher_order_information.dOinfo import DOInfoCalculator
 from toolbox.higher_order_information.local_o_info import LocalOHOI
+from toolbox.states_probabilities import StatesProbabilities
 from toolbox.utils import save_obj, load_obj
 
 
@@ -68,7 +69,7 @@ class HOIToolbox:
             t = time.time()
             ts = pd.read_csv("data/"+self.config["input"], sep='\t')
             #ts = pd.DataFrame(self.ts.transpose())
-            local_o_hoi = LocalOHOI(time_dimension="datapoint", trial_dimension="trial")
+            local_o_hoi = LocalOHOI(probability_estimator=StatesProbabilities(ts))
             local_o = local_o_hoi.exhaustive_local_o(ts)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")

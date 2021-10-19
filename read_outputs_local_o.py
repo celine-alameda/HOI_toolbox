@@ -24,6 +24,6 @@ local_o_info = load_obj(save_name)
 
 print("Local o info readout, object {}".format(save_name))
 
-data = pd.DataFrame(local_o_info).transpose()
+data["local_o"] = local_o_info
 data.to_csv(save_name.split('.')[0]+".tsv", sep='\t', index=False)
 

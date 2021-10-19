@@ -1,12 +1,20 @@
 """states_probabilities.py
 
 compute and retrieve probabilities for continuous, possibly polynomial, distributions"""
+from abc import abstractmethod
 
 import pandas as pd
 import scipy.stats
 
 
-class StatesProbabilities:
+class ProbabilityEstimator:
+
+    @abstractmethod
+    def get_probability(self, which_variables, values) -> float:
+        pass
+
+
+class StatesProbabilities(ProbabilityEstimator):
 
     def __init__(self, empirical_observations: pd.DataFrame):
         """initializes the StateProbability object
