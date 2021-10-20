@@ -45,17 +45,30 @@ class LocalOHOI:
         n_datapoints = data_table.shape[0]
         combinations_to_compute = variable_combinations(n_variables)
         probability_dict = {}
-        for combination in combinations_to_compute:
-            data_necessary = data_table.iloc[:, combination]
-            # transpose because the KDE is created with dimensions x datapoints
-            # the data_necessary table is row x columns
-            probability_dict[tuple(combination)] = scipy.stats.gaussian_kde(data_necessary.T).pdf(data_necessary.T)
-            print("ok combination {}".format(combination))
+        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+            futures = {executor.submit(compute_probability, data_table, combination): combination for combination
+                             in combinations_to_compute}
+            for future in concurrent.futures.as_completed(futures):
+                combination = futures[future]
+                try:
+                    probabilities = future.result()
+                except Exception as exc:
+                    print('%r generated an exception: %s' % (combination, exc))
+                else:
+                    probability_dict[tuple(combination)] = probabilities
 
         local_os = []
-        for i in range(n_datapoints):
+        print("Computing entropies from probabilities...")
+        for i in tqdm(range(n_datapoints)):
             local_os.append(local_o_of_index(n_variables, i, probability_dict))
         return local_os
+
+
+def compute_probability(data_table, combination):
+    data_necessary = data_table.iloc[:, combination]
+    # transpose because the KDE is created with dimensions x datapoints
+    # the data_necessary table is row x columns
+    return scipy.stats.gaussian_kde(data_necessary.T).pdf(data_necessary.T)
 
 
 def variable_combinations(n_variables):
