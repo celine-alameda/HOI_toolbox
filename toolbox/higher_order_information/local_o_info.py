@@ -49,7 +49,8 @@ class LocalOHOI:
         chunked_data_points = create_n_chunks(n_data_points, 1000)
         local_os = [0 for _ in range(n_data_points)]
         n_data_computed = 0
-        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+        task_status = [False for _ in range(len(chunked_data_points))]
+        with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
             future_chunked_local_os = {executor.submit(self._local_o_for_chunk, data_table, chunk): chunk for chunk in
                                        chunked_data_points}
             for future in concurrent.futures.as_completed(future_chunked_local_os):
