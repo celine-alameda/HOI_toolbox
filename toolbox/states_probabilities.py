@@ -46,4 +46,6 @@ class StatesProbabilities(ProbabilityEstimator):
 
     def _create_kde(self, which_variables):
         data_necessary = self._data_table.iloc[:, which_variables]
+        # transpose because the KDE is created with dimensions x datapoints
+        # the data_necessary table is row x columns
         return scipy.stats.gaussian_kde(data_necessary.T)
