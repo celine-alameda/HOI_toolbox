@@ -4,18 +4,11 @@
 import concurrent.futures
 import math
 from dataclasses import dataclass
-from itertools import combinations
-
-import numpy as np
-
 import pandas as pd
 import scipy
-from sklearn.utils import resample
 from tqdm import tqdm
 
-from toolbox.states_probabilities import StatesProbabilities, ProbabilityEstimator
-
-n_workers = 8  # todo put into class
+from toolbox.states_probabilities import ProbabilityEstimator
 
 
 @dataclass
@@ -34,7 +27,7 @@ def compute_probability(data_table, block: CombinationWithDataRange):
     return scipy.stats.gaussian_kde(data_necessary.T).pdf(data_to_compute.T)
 
 
-def compute_blocks(n_variables, n_datapoints) -> list:
+def compute_blocks(n_variables, n_datapoints, n_workers) -> list:
     blocks = []
     combinations = [list(range(n_variables))]
     for index_variable in range(n_variables):
@@ -87,11 +80,10 @@ def local_o_of_index(n_variables, index, probabilities: dict):
 
 class LocalOHOI:
 
-    def __init__(self, probability_estimator: ProbabilityEstimator):
-        self.bootstrap = False  # todo remove this argument and associated logic
+    def __init__(self, probability_estimator: ProbabilityEstimator, n_workers):
         self.probability_estimator = probability_estimator
+        self.n_workers = n_workers
 
-    # todo add some check to see if baseline table has the same columns as data_table
     def exhaustive_local_o(self, data_table: pd.DataFrame):
         """Computes local o information and significance for all data states in data_table.
             Returns
@@ -101,9 +93,9 @@ class LocalOHOI:
         """
         n_variables = data_table.shape[1]
         n_datapoints = data_table.shape[0]
-        blocks = compute_blocks(n_variables, n_datapoints)
+        blocks = compute_blocks(n_variables, n_datapoints, self.n_workers)
         probability_dict = {}
-        with concurrent.futures.ProcessPoolExecutor(max_workers=n_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=self.n_workers) as executor:
             futures = {executor.submit(compute_probability, data_table, block): block for block
                        in blocks}
             for future in concurrent.futures.as_completed(futures):

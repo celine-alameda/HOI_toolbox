@@ -1,6 +1,6 @@
 {
 	"input_type": "tsv",	
-	"input": "3_f_tfe.tsv",
+	"input": "4_fa_tf.tsv",
 	"metric": "local_o",
 	"higher_order": false,
 	"estimator": "gcmi",

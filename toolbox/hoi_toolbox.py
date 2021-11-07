@@ -69,7 +69,11 @@ class HOIToolbox:
             t = time.time()
             ts = pd.read_csv("data/"+self.config["input"], sep='\t')
             #ts = pd.DataFrame(self.ts.transpose())
-            local_o_hoi = LocalOHOI(probability_estimator=StatesProbabilities(ts))
+            if "workers" in self.config:
+                n_workers = self.config["workers"]
+            else:
+                n_workers = 8
+            local_o_hoi = LocalOHOI(probability_estimator=StatesProbabilities(ts), n_workers=n_workers)
             local_o = local_o_hoi.exhaustive_local_o(ts)
             elapsed = time.time() - t
             print("Elapsed time is ", elapsed, " seconds.")

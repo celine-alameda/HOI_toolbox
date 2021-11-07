@@ -25,7 +25,7 @@ if __name__ == "__main__":
         config = json.load(fd)
 
     inputFiles = []
-    pre_processings = ["3_u", "3_f"]
+    pre_processings = ["4_fa"]
     subjects = list(range(1, 6)) + list(range(7, 16))
     conditions_tdcs = ["real", "sham"]
     conditions_time = ["pre", "post"]
@@ -38,6 +38,7 @@ if __name__ == "__main__":
     for inputFile in inputFiles:
         print("local O computation for file {}".format(inputFile))
         config["input"] = inputFile
+        config["workers"] = 8  # save one cpu to use the computer while working
         tb = HOIToolbox(config)
         tb.run()
         print("Local o computation done. Assembling outputs...")
